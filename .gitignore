@@ -19,3 +19,6 @@ dist.ini
 /_build/
 /Build
 /Build.bat
+
+# Server logs
+*.log
