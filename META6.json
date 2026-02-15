@@ -19,6 +19,7 @@
     "Lang::Transliterate::Ar::EALL": "lib/Lang/Transliterate/Ar/EALL.rakumod",
     "Lang::Transliterate::Ar::EI": "lib/Lang/Transliterate/Ar/EI.rakumod",
     "Lang::Transliterate::Ar::ISO233": "lib/Lang/Transliterate/Ar/ISO233.rakumod",
+    "Lang::Transliterate::Ar::Phonetic": "lib/Lang/Transliterate/Ar/Phonetic.rakumod",
     "Lang::Transliterate::Ar::UNGEGN": "lib/Lang/Transliterate/Ar/UNGEGN.rakumod",
     "Lang::Transliterate::Ar::Wehr": "lib/Lang/Transliterate/Ar/Wehr.rakumod",
     "Lang::Transliterate::Arc::Arabic": "lib/Lang/Transliterate/Arc/Arabic.rakumod",
