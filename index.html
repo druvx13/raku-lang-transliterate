@@ -1,0 +1,696 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Sanskrit to IAST Transliteration Tool</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+            line-height: 1.6;
+            color: #333;
+            background: #f5f5f5;
+            padding: 20px;
+        }
+        
+        .container {
+            max-width: 1200px;
+            margin: 0 auto;
+            background: white;
+            padding: 30px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+        }
+        
+        h1 {
+            text-align: center;
+            color: #2c3e50;
+            margin-bottom: 10px;
+            font-size: 2em;
+        }
+        
+        .subtitle {
+            text-align: center;
+            color: #7f8c8d;
+            margin-bottom: 30px;
+            font-size: 0.9em;
+        }
+        
+        .conversion-area {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        
+        .input-section, .output-section {
+            display: flex;
+            flex-direction: column;
+        }
+        
+        label {
+            font-weight: 600;
+            margin-bottom: 8px;
+            color: #2c3e50;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        
+        textarea {
+            width: 100%;
+            min-height: 250px;
+            padding: 12px;
+            border: 2px solid #e0e0e0;
+            border-radius: 4px;
+            font-size: 16px;
+            resize: vertical;
+            font-family: 'Noto Sans Devanagari', sans-serif;
+        }
+        
+        textarea:focus {
+            outline: none;
+            border-color: #3498db;
+        }
+        
+        #sanskritInput {
+            font-size: 20px;
+        }
+        
+        #iastOutput {
+            background: #f8f9fa;
+        }
+        
+        .button-group {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+        
+        button {
+            padding: 12px 24px;
+            border: none;
+            border-radius: 4px;
+            cursor: pointer;
+            font-size: 14px;
+            font-weight: 600;
+            transition: all 0.3s;
+        }
+        
+        .btn-primary {
+            background: #3498db;
+            color: white;
+        }
+        
+        .btn-primary:hover {
+            background: #2980b9;
+        }
+        
+        .btn-secondary {
+            background: #95a5a6;
+            color: white;
+        }
+        
+        .btn-secondary:hover {
+            background: #7f8c8d;
+        }
+        
+        .btn-success {
+            background: #27ae60;
+            color: white;
+        }
+        
+        .btn-success:hover {
+            background: #229954;
+        }
+        
+        .info-section {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 4px;
+            margin-top: 20px;
+        }
+        
+        .info-section h2 {
+            color: #2c3e50;
+            margin-bottom: 15px;
+            font-size: 1.3em;
+        }
+        
+        .mapping-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+            gap: 15px;
+            margin-top: 15px;
+        }
+        
+        .mapping-category {
+            background: white;
+            padding: 12px;
+            border-radius: 4px;
+        }
+        
+        .mapping-category h3 {
+            color: #34495e;
+            font-size: 1em;
+            margin-bottom: 8px;
+            border-bottom: 2px solid #3498db;
+            padding-bottom: 4px;
+        }
+        
+        .mapping-item {
+            display: flex;
+            justify-content: space-between;
+            padding: 4px 0;
+            font-family: monospace;
+            font-size: 14px;
+        }
+        
+        .devanagari {
+            font-family: 'Noto Sans Devanagari', sans-serif;
+            font-size: 18px;
+            color: #e74c3c;
+        }
+        
+        .iast {
+            color: #27ae60;
+        }
+        
+        .examples {
+            margin-top: 15px;
+        }
+        
+        .example-item {
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 4px;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+        
+        .example-item:hover {
+            background: #d5dbdb;
+        }
+        
+        .char-count {
+            font-size: 0.85em;
+            color: #7f8c8d;
+        }
+        
+        @media (max-width: 768px) {
+            .conversion-area {
+                grid-template-columns: 1fr;
+            }
+            
+            .container {
+                padding: 15px;
+            }
+            
+            h1 {
+                font-size: 1.5em;
+            }
+        }
+        
+        .copy-feedback {
+            display: none;
+            color: #27ae60;
+            font-size: 0.85em;
+            margin-top: 5px;
+        }
+        
+        .copy-feedback.show {
+            display: block;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Sanskrit to IAST Transliteration</h1>
+        <div class="subtitle">International Alphabet of Sanskrit Transliteration</div>
+        
+        <div class="conversion-area">
+            <div class="input-section">
+                <label for="sanskritInput">
+                    Sanskrit (Devanagari)
+                    <span class="char-count" id="inputCount">0 characters</span>
+                </label>
+                <textarea id="sanskritInput" placeholder="Enter Sanskrit text in Devanagari script...
+Example: नमस्ते"></textarea>
+            </div>
+            
+            <div class="output-section">
+                <label for="iastOutput">
+                    IAST Transliteration
+                    <span class="char-count" id="outputCount">0 characters</span>
+                </label>
+                <textarea id="iastOutput" readonly placeholder="IAST transliteration will appear here...
+Example: namaste"></textarea>
+                <div class="copy-feedback" id="copyFeedback">✓ Copied to clipboard!</div>
+            </div>
+        </div>
+        
+        <div class="button-group">
+            <button class="btn-primary" onclick="transliterateSanskrit()">Transliterate to IAST →</button>
+            <button class="btn-primary" onclick="transliterateReverse()">← Transliterate to Sanskrit</button>
+            <button class="btn-success" onclick="copyOutput()">Copy Output</button>
+            <button class="btn-secondary" onclick="clearAll()">Clear All</button>
+            <button class="btn-secondary" onclick="swapTexts()">Swap ⇄</button>
+        </div>
+        
+        <div class="info-section">
+            <h2>Example Sanskrit Texts</h2>
+            <div class="examples">
+                <div class="example-item" onclick="loadExample('नमस्ते')">
+                    <strong>नमस्ते</strong> → namaste (Greeting)
+                </div>
+                <div class="example-item" onclick="loadExample('भगवद्गीता')">
+                    <strong>भगवद्गीता</strong> → bhagavadgītā (Bhagavad Gita)
+                </div>
+                <div class="example-item" onclick="loadExample('संस्कृतम्')">
+                    <strong>संस्कृतम्</strong> → saṁskṛtam (Sanskrit)
+                </div>
+                <div class="example-item" onclick="loadExample('धर्म')">
+                    <strong>धर्म</strong> → dharma (Righteousness)
+                </div>
+                <div class="example-item" onclick="loadExample('योग')">
+                    <strong>योग</strong> → yoga (Yoga)
+                </div>
+                <div class="example-item" onclick="loadExample('ॐ नमः शिवाय')">
+                    <strong>ॐ नमः शिवाय</strong> → oṁ namaḥ śivāya (Om Namah Shivaya)
+                </div>
+            </div>
+        </div>
+        
+        <div class="info-section">
+            <h2>IAST Character Mappings</h2>
+            <div class="mapping-grid">
+                <div class="mapping-category">
+                    <h3>Vowels</h3>
+                    <div class="mapping-item"><span class="devanagari">अ</span> <span class="iast">→ a</span></div>
+                    <div class="mapping-item"><span class="devanagari">आ</span> <span class="iast">→ ā</span></div>
+                    <div class="mapping-item"><span class="devanagari">इ</span> <span class="iast">→ i</span></div>
+                    <div class="mapping-item"><span class="devanagari">ई</span> <span class="iast">→ ī</span></div>
+                    <div class="mapping-item"><span class="devanagari">उ</span> <span class="iast">→ u</span></div>
+                    <div class="mapping-item"><span class="devanagari">ऊ</span> <span class="iast">→ ū</span></div>
+                    <div class="mapping-item"><span class="devanagari">ऋ</span> <span class="iast">→ ṛ</span></div>
+                    <div class="mapping-item"><span class="devanagari">ॠ</span> <span class="iast">→ ṝ</span></div>
+                    <div class="mapping-item"><span class="devanagari">ऌ</span> <span class="iast">→ ḷ</span></div>
+                    <div class="mapping-item"><span class="devanagari">ॡ</span> <span class="iast">→ ḹ</span></div>
+                    <div class="mapping-item"><span class="devanagari">ए</span> <span class="iast">→ e</span></div>
+                    <div class="mapping-item"><span class="devanagari">ऐ</span> <span class="iast">→ ai</span></div>
+                    <div class="mapping-item"><span class="devanagari">ओ</span> <span class="iast">→ o</span></div>
+                    <div class="mapping-item"><span class="devanagari">औ</span> <span class="iast">→ au</span></div>
+                </div>
+                
+                <div class="mapping-category">
+                    <h3>Velars & Palatals</h3>
+                    <div class="mapping-item"><span class="devanagari">क</span> <span class="iast">→ ka</span></div>
+                    <div class="mapping-item"><span class="devanagari">ख</span> <span class="iast">→ kha</span></div>
+                    <div class="mapping-item"><span class="devanagari">ग</span> <span class="iast">→ ga</span></div>
+                    <div class="mapping-item"><span class="devanagari">घ</span> <span class="iast">→ gha</span></div>
+                    <div class="mapping-item"><span class="devanagari">ङ</span> <span class="iast">→ ṅa</span></div>
+                    <div class="mapping-item"><span class="devanagari">च</span> <span class="iast">→ ca</span></div>
+                    <div class="mapping-item"><span class="devanagari">छ</span> <span class="iast">→ cha</span></div>
+                    <div class="mapping-item"><span class="devanagari">ज</span> <span class="iast">→ ja</span></div>
+                    <div class="mapping-item"><span class="devanagari">झ</span> <span class="iast">→ jha</span></div>
+                    <div class="mapping-item"><span class="devanagari">ञ</span> <span class="iast">→ ña</span></div>
+                </div>
+                
+                <div class="mapping-category">
+                    <h3>Retroflexes & Dentals</h3>
+                    <div class="mapping-item"><span class="devanagari">ट</span> <span class="iast">→ ṭa</span></div>
+                    <div class="mapping-item"><span class="devanagari">ठ</span> <span class="iast">→ ṭha</span></div>
+                    <div class="mapping-item"><span class="devanagari">ड</span> <span class="iast">→ ḍa</span></div>
+                    <div class="mapping-item"><span class="devanagari">ढ</span> <span class="iast">→ ḍha</span></div>
+                    <div class="mapping-item"><span class="devanagari">ण</span> <span class="iast">→ ṇa</span></div>
+                    <div class="mapping-item"><span class="devanagari">त</span> <span class="iast">→ ta</span></div>
+                    <div class="mapping-item"><span class="devanagari">थ</span> <span class="iast">→ tha</span></div>
+                    <div class="mapping-item"><span class="devanagari">द</span> <span class="iast">→ da</span></div>
+                    <div class="mapping-item"><span class="devanagari">ध</span> <span class="iast">→ dha</span></div>
+                    <div class="mapping-item"><span class="devanagari">न</span> <span class="iast">→ na</span></div>
+                </div>
+                
+                <div class="mapping-category">
+                    <h3>Labials & Others</h3>
+                    <div class="mapping-item"><span class="devanagari">प</span> <span class="iast">→ pa</span></div>
+                    <div class="mapping-item"><span class="devanagari">फ</span> <span class="iast">→ pha</span></div>
+                    <div class="mapping-item"><span class="devanagari">ब</span> <span class="iast">→ ba</span></div>
+                    <div class="mapping-item"><span class="devanagari">भ</span> <span class="iast">→ bha</span></div>
+                    <div class="mapping-item"><span class="devanagari">म</span> <span class="iast">→ ma</span></div>
+                    <div class="mapping-item"><span class="devanagari">य</span> <span class="iast">→ ya</span></div>
+                    <div class="mapping-item"><span class="devanagari">र</span> <span class="iast">→ ra</span></div>
+                    <div class="mapping-item"><span class="devanagari">ल</span> <span class="iast">→ la</span></div>
+                    <div class="mapping-item"><span class="devanagari">व</span> <span class="iast">→ va</span></div>
+                    <div class="mapping-item"><span class="devanagari">ह</span> <span class="iast">→ ha</span></div>
+                </div>
+                
+                <div class="mapping-category">
+                    <h3>Sibilants & Specials</h3>
+                    <div class="mapping-item"><span class="devanagari">श</span> <span class="iast">→ śa</span></div>
+                    <div class="mapping-item"><span class="devanagari">ष</span> <span class="iast">→ ṣa</span></div>
+                    <div class="mapping-item"><span class="devanagari">स</span> <span class="iast">→ sa</span></div>
+                    <div class="mapping-item"><span class="devanagari">ं</span> <span class="iast">→ ṁ</span></div>
+                    <div class="mapping-item"><span class="devanagari">ः</span> <span class="iast">→ ḥ</span></div>
+                    <div class="mapping-item"><span class="devanagari">ँ</span> <span class="iast">→ m̐</span></div>
+                    <div class="mapping-item"><span class="devanagari">ऽ</span> <span class="iast">→ '</span></div>
+                    <div class="mapping-item"><span class="devanagari">ॐ</span> <span class="iast">→ oṁ</span></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // IAST transliteration mappings based on Lang::Transliterate::Sa::IAST
+        const IASTMappings = {
+            // Independent vowels
+            'अ': 'a', 'आ': 'ā', 'इ': 'i', 'ई': 'ī',
+            'उ': 'u', 'ऊ': 'ū', 'ऋ': 'ṛ', 'ॠ': 'ṝ',
+            'ऌ': 'ḷ', 'ॡ': 'ḹ', 'ए': 'e', 'ऐ': 'ai',
+            'ओ': 'o', 'औ': 'au',
+            
+            // Special marks
+            'ं': 'ṁ', 'ः': 'ḥ', 'ँ': 'm\u0310', 'ऽ': "'",
+            
+            // Consonants - Velars
+            'क': 'k', 'ख': 'kh', 'ग': 'g', 'घ': 'gh', 'ङ': 'ṅ',
+            
+            // Palatals
+            'च': 'c', 'छ': 'ch', 'ज': 'j', 'झ': 'jh', 'ञ': 'ñ',
+            
+            // Retroflexes
+            'ट': 'ṭ', 'ठ': 'ṭh', 'ड': 'ḍ', 'ढ': 'ḍh', 'ण': 'ṇ',
+            
+            // Dentals
+            'त': 't', 'थ': 'th', 'द': 'd', 'ध': 'dh', 'न': 'n',
+            
+            // Labials
+            'प': 'p', 'फ': 'ph', 'ब': 'b', 'भ': 'bh', 'म': 'm',
+            
+            // Approximants
+            'य': 'y', 'र': 'r', 'ल': 'l', 'व': 'v', 'ह': 'h',
+            
+            // Sibilants
+            'श': 'ś', 'ष': 'ṣ', 'स': 's',
+            
+            // Additional
+            'ळ': 'ḻ',
+            
+            // Nukta characters (foreign sounds)
+            'क़': 'q', 'ख़': 'x', 'ग़': 'ġ', 'ज़': 'z',
+            'ड़': 'ṛ', 'ढ़': 'ṛh', 'फ़': 'f', 'य़': 'ẏ',
+            
+            // Vowel signs (matras)
+            'ा': 'ā', 'ि': 'i', 'ी': 'ī', 'ु': 'u', 'ू': 'ū',
+            'ृ': 'ṛ', 'ॄ': 'ṝ', 'ॢ': 'ḷ', 'ॣ': 'ḹ',
+            'े': 'e', 'ै': 'ai', 'ो': 'o', 'ौ': 'au',
+            
+            // Virama
+            '्': '',
+            
+            // Numbers
+            '०': '0', '१': '1', '२': '2', '३': '3', '४': '4',
+            '५': '5', '६': '6', '७': '7', '८': '8', '९': '9',
+            
+            // Punctuation
+            '।': '।', '॥': '॥',
+            
+            // Om
+            'ॐ': 'oṁ'
+        };
+        
+        // Reverse mappings for IAST to Devanagari
+        const reverseIASTMappings = {};
+        
+        function initializeReverseMappings() {
+            // Create reverse mappings for detransliteration
+            const vowelMatras = {
+                'ā': 'ा', 'i': 'ि', 'ī': 'ी', 'u': 'ु', 'ū': 'ू',
+                'ṛ': 'ृ', 'ṝ': 'ॄ', 'ḷ': 'ॢ', 'ḹ': 'ॣ',
+                'e': 'े', 'ai': 'ै', 'o': 'ो', 'au': 'ौ'
+            };
+            
+            const consonants = {
+                'k': 'क', 'kh': 'ख', 'g': 'ग', 'gh': 'घ', 'ṅ': 'ङ',
+                'c': 'च', 'ch': 'छ', 'j': 'ज', 'jh': 'झ', 'ñ': 'ञ',
+                'ṭ': 'ट', 'ṭh': 'ठ', 'ḍ': 'ड', 'ḍh': 'ढ', 'ṇ': 'ण',
+                't': 'त', 'th': 'थ', 'd': 'द', 'dh': 'ध', 'n': 'न',
+                'p': 'प', 'ph': 'फ', 'b': 'ब', 'bh': 'भ', 'm': 'म',
+                'y': 'य', 'r': 'र', 'l': 'ल', 'v': 'व', 'h': 'ह',
+                'ś': 'श', 'ṣ': 'ष', 's': 'स', 'ḻ': 'ळ',
+                'q': 'क़', 'x': 'ख़', 'ġ': 'ग़', 'z': 'ज़', 'f': 'फ़'
+            };
+            
+            const vowels = {
+                'a': 'अ', 'ā': 'आ', 'i': 'इ', 'ī': 'ई',
+                'u': 'उ', 'ū': 'ऊ', 'ṛ': 'ऋ', 'ṝ': 'ॠ',
+                'ḷ': 'ऌ', 'ḹ': 'ॡ', 'e': 'ए', 'ai': 'ऐ',
+                'o': 'ओ', 'au': 'औ'
+            };
+            
+            const special = {
+                'ṁ': 'ं', 'ḥ': 'ḥ', 'm̐': 'ँ', "'": 'ऽ',
+                'oṁ': 'ॐ', '।': '।', '॥': '॥'
+            };
+            
+            reverseIASTMappings.vowelMatras = vowelMatras;
+            reverseIASTMappings.consonants = consonants;
+            reverseIASTMappings.vowels = vowels;
+            reverseIASTMappings.special = special;
+        }
+        
+        function isConsonant(char) {
+            const code = char.charCodeAt(0);
+            return (code >= 0x0915 && code <= 0x0939) ||
+                   (code >= 0x0958 && code <= 0x095F) ||
+                   (code === 0x0979) || (code === 0x097A);
+        }
+        
+        function isVowelSign(char) {
+            const code = char.charCodeAt(0);
+            return (code >= 0x093E && code <= 0x094C) ||
+                   (code >= 0x094E && code <= 0x094F) ||
+                   (code >= 0x0955 && code <= 0x0957) ||
+                   (code >= 0x0962 && code <= 0x0963);
+        }
+        
+        function isDevanagari(char) {
+            const code = char.charCodeAt(0);
+            return (code >= 0x0900 && code <= 0x097F) ||
+                   (code >= 0xA8E0 && code <= 0xA8FF);
+        }
+        
+        function transliterateSanskritToIAST(text) {
+            let result = '';
+            const chars = Array.from(text.normalize('NFD'));
+            let i = 0;
+            
+            while (i < chars.length) {
+                const char = chars[i];
+                const nextChar = i + 1 < chars.length ? chars[i + 1] : '';
+                
+                if (!isDevanagari(char)) {
+                    result += char;
+                    i++;
+                    continue;
+                }
+                
+                if (isConsonant(char)) {
+                    // Handle nukta combinations (क + ़ → क़)
+                    if (nextChar === '\u093C') {
+                        const nuktaCombo = char + nextChar;
+                        const transliteration = IASTMappings[nuktaCombo];
+                        if (transliteration !== undefined) {
+                            const afterNukta = i + 2 < chars.length ? chars[i + 2] : '';
+                            if (afterNukta && isVowelSign(afterNukta)) {
+                                result += transliteration + IASTMappings[afterNukta];
+                                i += 3;
+                            } else {
+                                result += transliteration + 'a';
+                                i += 2;
+                            }
+                            continue;
+                        }
+                    }
+                    
+                    // Check for virama (halant)
+                    if (nextChar === '्') {
+                        result += IASTMappings[char] || char;
+                        i += 2;
+                        continue;
+                    }
+                    
+                    // Check for vowel sign
+                    if (nextChar && isVowelSign(nextChar)) {
+                        result += IASTMappings[char] + (IASTMappings[nextChar] || '');
+                        i += 2;
+                        continue;
+                    }
+                    
+                    // Regular consonant with inherent 'a'
+                    result += IASTMappings[char] + 'a';
+                    i++;
+                } else if (isVowelSign(char)) {
+                    result += IASTMappings[char] || char;
+                    i++;
+                } else if (char === '्') {
+                    // Standalone virama (skip)
+                    i++;
+                } else {
+                    // Vowel, number, punctuation, or other character
+                    result += IASTMappings[char] || char;
+                    i++;
+                }
+            }
+            
+            return result;
+        }
+        
+        function transliterateIASTToSanskrit(text) {
+            let result = '';
+            let i = 0;
+            
+            // Normalize input text
+            text = text.normalize('NFD');
+            
+            // Pre-process common alternatives
+            text = text.replace(/ṃ/g, 'ṁ');
+            text = text.replace(/ksh/g, 'kṣ');
+            
+            while (i < text.length) {
+                let matched = false;
+                
+                // Try to match special sequences first (longer matches)
+                for (let len = 3; len >= 1; len--) {
+                    const substr = text.substr(i, len);
+                    
+                    // Try consonant + vowel matra combinations
+                    if (len === 2 || len === 3) {
+                        // Check for special characters first
+                        if (reverseIASTMappings.special[substr]) {
+                            result += reverseIASTMappings.special[substr];
+                            i += len;
+                            matched = true;
+                            break;
+                        }
+                        
+                        // Check for consonant clusters (kh, th, etc.)
+                        if (reverseIASTMappings.consonants[substr]) {
+                            const cons = reverseIASTMappings.consonants[substr];
+                            // Check if followed by a vowel
+                            let vowelLen = 2;
+                            let nextVowel = text.substr(i + len, vowelLen);
+                            if (!reverseIASTMappings.vowelMatras[nextVowel]) {
+                                vowelLen = 1;
+                                nextVowel = text.substr(i + len, vowelLen);
+                            }
+                            
+                            if (reverseIASTMappings.vowelMatras[nextVowel]) {
+                                result += cons + reverseIASTMappings.vowelMatras[nextVowel];
+                                i += len + vowelLen;
+                            } else if (nextVowel === 'a') {
+                                // Inherent 'a'
+                                result += cons;
+                                i += len + 1;
+                            } else {
+                                // Consonant without explicit vowel - add virama
+                                result += cons + '्';
+                                i += len;
+                            }
+                            matched = true;
+                            break;
+                        }
+                    }
+                    
+                    // Try independent vowels
+                    if (reverseIASTMappings.vowels[substr]) {
+                        result += reverseIASTMappings.vowels[substr];
+                        i += len;
+                        matched = true;
+                        break;
+                    }
+                }
+                
+                if (!matched) {
+                    // No match found, keep the character as-is
+                    result += text[i];
+                    i++;
+                }
+            }
+            
+            return result.normalize('NFC');
+        }
+        
+        function transliterateSanskrit() {
+            const input = document.getElementById('sanskritInput').value;
+            const output = transliterateSanskritToIAST(input);
+            document.getElementById('iastOutput').value = output;
+            updateCharCounts();
+        }
+        
+        function transliterateReverse() {
+            const input = document.getElementById('iastOutput').value;
+            const output = transliterateIASTToSanskrit(input);
+            document.getElementById('sanskritInput').value = output;
+            updateCharCounts();
+        }
+        
+        function clearAll() {
+            document.getElementById('sanskritInput').value = '';
+            document.getElementById('iastOutput').value = '';
+            updateCharCounts();
+        }
+        
+        function swapTexts() {
+            const input = document.getElementById('sanskritInput').value;
+            const output = document.getElementById('iastOutput').value;
+            document.getElementById('sanskritInput').value = output;
+            document.getElementById('iastOutput').value = input;
+            updateCharCounts();
+        }
+        
+        function copyOutput() {
+            const output = document.getElementById('iastOutput');
+            output.select();
+            document.execCommand('copy');
+            
+            const feedback = document.getElementById('copyFeedback');
+            feedback.classList.add('show');
+            setTimeout(() => {
+                feedback.classList.remove('show');
+            }, 2000);
+        }
+        
+        function loadExample(text) {
+            document.getElementById('sanskritInput').value = text;
+            transliterateSanskrit();
+        }
+        
+        function updateCharCounts() {
+            const inputCount = document.getElementById('sanskritInput').value.length;
+            const outputCount = document.getElementById('iastOutput').value.length;
+            document.getElementById('inputCount').textContent = `${inputCount} character${inputCount !== 1 ? 's' : ''}`;
+            document.getElementById('outputCount').textContent = `${outputCount} character${outputCount !== 1 ? 's' : ''}`;
+        }
+        
+        // Auto-transliterate on input
+        document.getElementById('sanskritInput').addEventListener('input', function() {
+            transliterateSanskrit();
+        });
+        
+        // Initialize reverse mappings
+        initializeReverseMappings();
+        
+        // Initialize character counts
+        updateCharCounts();
+    </script>
+</body>
+</html>
